@@ -1,11 +1,23 @@
 import os
-from crewai import Agent, Task, Crew, Process
+from datetime import datetime
+from crewai import Agent, Task, Crew, Process # Keep these from crewai
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
-from datetime import datetime # Import datetime
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from crewai import Agent, Task, Crew, Process, Tool # Make sure Tool is imported
+from crewai.tools import tool # Corrected: Import decorator from crewai.tools
+
+# --- Generate a unique log filename ---
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+log_filename = f"crew_run_{timestamp}.log"
+# --- End of filename generation ---
+
+load_dotenv() # Load environment variables from .env file (ensure OPENAI_API_KEY is set)
+
+# --- LLM Configuration ---
+llm = ChatOpenAI(model="gpt-4.5-preview", # Using the model you confirmed works
+                 openai_api_key=os.getenv("OPENAI_API_KEY"),
+                 temperature=0.7)
 
 # --- RAG Tool Setup ---
 # Define constants for consistency
@@ -13,28 +25,31 @@ CHROMA_PERSIST_DIR = "chroma_db"
 EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
 
 print("Initializing RAG components...")
-# Initialize the embedding function (needs to match the one used for indexing)
-# This should be relatively fast after the first download by create_index.py
+# Initialize the embedding function
 embedding_function = HuggingFaceEmbeddings(
     model_name=EMBEDDING_MODEL_NAME,
-    model_kwargs={'device': 'cpu'}, # Use 'cpu' for consistency
+    model_kwargs={'device': 'cpu'},
     encode_kwargs={'normalize_embeddings': False}
 )
 
 # Load the persisted vector store
-# This loads the index from the specified directory
-vectorstore = Chroma(
-    persist_directory=CHROMA_PERSIST_DIR,
-    embedding_function=embedding_function
-)
-
-# Create a retriever interface from the vector store
-# search_kwargs={"k": 3} retrieves the top 3 most relevant chunks
-retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
-
-print("RAG components initialized.")
+# Ensure the chroma_db directory exists and was created by create_index.py
+try:
+    vectorstore = Chroma(
+        persist_directory=CHROMA_PERSIST_DIR,
+        embedding_function=embedding_function
+    )
+    # Create a retriever interface
+    retriever = vectorstore.as_retriever(search_kwargs={"k": 3}) # Retrieve top 3 results
+    print("RAG components initialized successfully.")
+except Exception as e:
+    print(f"Error initializing ChromaDB, did you run create_index.py?")
+    print(f"Error: {e}")
+    # Exit or handle error appropriately if RAG is essential
+    exit()
 
 # Define the function that the tool will execute
+@tool("Knowledge Base Search") # Apply the decorator
 def search_knowledge_base(query: str) -> str:
     """
     Searches the project's knowledge base (vector database) containing documents like
@@ -42,20 +57,22 @@ def search_knowledge_base(query: str) -> str:
     Use this tool to find relevant context, specific details, or background information to ensure
     consistency and accuracy in your response. Input should be a specific question or topic to search for.
     """
-    print(f"\n--- Executing Knowledge Base Search ---")
+    print(f"\n--- Executing Knowledge Base Search ---") # Log when tool is called
     print(f"--- Query: {query}")
     try:
-        # Retrieve relevant documents based on the query
-        relevant_docs = retriever.invoke(query) # Use invoke with newer LangChain versions
+        # Ensure retriever is initialized before using it
+        if 'retriever' not in globals():
+             return "Error: Retriever not initialized. Cannot search knowledge base."
 
-        # Format the results for the agent
+        relevant_docs = retriever.invoke(query)
         formatted_docs = []
         if relevant_docs:
             for i, doc in enumerate(relevant_docs):
                 source = doc.metadata.get('source', 'Unknown source')
-                # Limit the length of page_content to avoid overly long context
+                # Use os.path.basename to get just the filename from the source path
+                source_filename = os.path.basename(source) if source != 'Unknown source' else source
                 content_preview = doc.page_content[:500] + "..." if len(doc.page_content) > 500 else doc.page_content
-                formatted_docs.append(f"Source {i+1} ({os.path.basename(source)}):\n{content_preview}") # Use basename for cleaner source
+                formatted_docs.append(f"Source {i+1} ({source_filename}):\n{content_preview}")
 
             print(f"--- Found {len(relevant_docs)} relevant snippets. ---")
             return "\n\n".join(formatted_docs)
@@ -66,29 +83,7 @@ def search_knowledge_base(query: str) -> str:
         print(f"--- Error during knowledge base search: {e} ---")
         return f"Error accessing knowledge base: {e}"
 
-# Create the CrewAI Tool instance
-knowledge_base_tool = Tool(
-    name="Knowledge Base Search",
-    description=(
-        "Queries the Mythborne Companions project knowledge base for relevant information. "
-        "Use it to look up specific details about game design, mechanics, Pi integration policies, "
-        "technical feasibility, art style, or UI/UX flows to ensure your work is consistent "
-        "and based on existing project documentation."
-    ),
-    func=search_knowledge_base
-)
-
-# --- Generate a unique log filename ---
-timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-log_filename = f"crew_run_{timestamp}.log"
-# --- End of filename generation ---
-
-load_dotenv() # Load environment variables from .env file (ensure OPENAI_API_KEY is set)
-
-# Configure the OpenAI LLM (using gpt-4.5-preview for initial testing, can upgrade later)
-llm = ChatOpenAI(model="gpt-4.5-preview",
-                 openai_api_key=os.getenv("OPENAI_API_KEY"),
-                 temperature=0.7)
+# --- End of RAG Tool Setup ---
 
 # --- Agent Definitions for "Mythborne Companions" ---
 
@@ -105,7 +100,7 @@ project_manager = Agent(
     llm=llm,
     allow_delegation=False,
     verbose=True,
-    tools=[knowledge_base_tool] # <-- Add the tool here
+    tools=[search_knowledge_base] # Pass the decorated function directly
 )
 
 # 2. Game Designer Agent
@@ -120,7 +115,7 @@ game_designer = Agent(
     llm=llm,
     allow_delegation=False,
     verbose=True,
-    tools=[knowledge_base_tool] # <-- Add the tool here
+    tools=[search_knowledge_base] # Pass the decorated function directly
 )
 
 # 3. Lead Programmer Agent
@@ -135,7 +130,7 @@ lead_programmer = Agent(
     llm=llm,
     allow_delegation=False,
     verbose=True,
-    tools=[knowledge_base_tool] # <-- Add the tool here
+    tools=[search_knowledge_base] # Pass the decorated function directly
 )
 
 # 4. Lead Artist Agent
@@ -150,7 +145,7 @@ lead_artist = Agent(
     llm=llm,
     allow_delegation=False,
     verbose=True,
-    tools=[knowledge_base_tool] # <-- Add the tool here
+    tools=[search_knowledge_base] # Pass the decorated function directly
 )
 
 # 5. UI/UX Designer Agent
@@ -165,7 +160,7 @@ ui_ux_designer = Agent(
     llm=llm,
     allow_delegation=False,
     verbose=True,
-    tools=[knowledge_base_tool] # <-- Add the tool here
+    tools=[search_knowledge_base] # Pass the decorated function directly
 )
 
 
@@ -303,16 +298,16 @@ mythborne_crew = Crew(
     ],
     process=Process.sequential, # Run these two tasks sequentially
     verbose=True,
-    # Use the built-in logging you confirmed works
-    output_log_file=f"crew_run_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log" # Using timestamped log file
+    # Use the timestamped log file name generated earlier
+    output_log_file=log_filename
 )
 
 # --- Kick Off the Crew's Work ---
-print(f"###################################################")
+print("###################################################")
 # Update print statement to reflect new focus
-print(f"## Starting Mythborne Companions Crew Run (Revising Pi Earning & Exploring NFTs)...")
+print("## Starting Mythborne Companions Crew Run (Revising Pi Earning & Exploring NFTs)...")
 print(f"## Logging verbose output to: {mythborne_crew.output_log_file}") # Access the filename from the crew object
-print(f"###################################################")
+print("###################################################")
 result = mythborne_crew.kickoff()
 
 # --- Print the Final Result ---

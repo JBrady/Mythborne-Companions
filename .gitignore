@@ -17,3 +17,6 @@ venv/
 
 # Vector Database (Generated locally)
 chroma_db/
+
+# Archive for old knowledge base files
+knowledge_base_archive/
