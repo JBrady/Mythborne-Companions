@@ -3,6 +3,80 @@ from crewai import Agent, Task, Crew, Process
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 from datetime import datetime # Import datetime
+from langchain_community.vectorstores import Chroma
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from crewai import Agent, Task, Crew, Process, Tool # Make sure Tool is imported
+
+# --- RAG Tool Setup ---
+# Define constants for consistency
+CHROMA_PERSIST_DIR = "chroma_db"
+EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
+
+print("Initializing RAG components...")
+# Initialize the embedding function (needs to match the one used for indexing)
+# This should be relatively fast after the first download by create_index.py
+embedding_function = HuggingFaceEmbeddings(
+    model_name=EMBEDDING_MODEL_NAME,
+    model_kwargs={'device': 'cpu'}, # Use 'cpu' for consistency
+    encode_kwargs={'normalize_embeddings': False}
+)
+
+# Load the persisted vector store
+# This loads the index from the specified directory
+vectorstore = Chroma(
+    persist_directory=CHROMA_PERSIST_DIR,
+    embedding_function=embedding_function
+)
+
+# Create a retriever interface from the vector store
+# search_kwargs={"k": 3} retrieves the top 3 most relevant chunks
+retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
+
+print("RAG components initialized.")
+
+# Define the function that the tool will execute
+def search_knowledge_base(query: str) -> str:
+    """
+    Searches the project's knowledge base (vector database) containing documents like
+    GDD sections, feasibility reports, style guides, meeting notes etc. for Mythborne Companions.
+    Use this tool to find relevant context, specific details, or background information to ensure
+    consistency and accuracy in your response. Input should be a specific question or topic to search for.
+    """
+    print(f"\n--- Executing Knowledge Base Search ---")
+    print(f"--- Query: {query}")
+    try:
+        # Retrieve relevant documents based on the query
+        relevant_docs = retriever.invoke(query) # Use invoke with newer LangChain versions
+
+        # Format the results for the agent
+        formatted_docs = []
+        if relevant_docs:
+            for i, doc in enumerate(relevant_docs):
+                source = doc.metadata.get('source', 'Unknown source')
+                # Limit the length of page_content to avoid overly long context
+                content_preview = doc.page_content[:500] + "..." if len(doc.page_content) > 500 else doc.page_content
+                formatted_docs.append(f"Source {i+1} ({os.path.basename(source)}):\n{content_preview}") # Use basename for cleaner source
+
+            print(f"--- Found {len(relevant_docs)} relevant snippets. ---")
+            return "\n\n".join(formatted_docs)
+        else:
+            print("--- No relevant snippets found. ---")
+            return "No relevant information found in the knowledge base for that query."
+    except Exception as e:
+        print(f"--- Error during knowledge base search: {e} ---")
+        return f"Error accessing knowledge base: {e}"
+
+# Create the CrewAI Tool instance
+knowledge_base_tool = Tool(
+    name="Knowledge Base Search",
+    description=(
+        "Queries the Mythborne Companions project knowledge base for relevant information. "
+        "Use it to look up specific details about game design, mechanics, Pi integration policies, "
+        "technical feasibility, art style, or UI/UX flows to ensure your work is consistent "
+        "and based on existing project documentation."
+    ),
+    func=search_knowledge_base
+)
 
 # --- Generate a unique log filename ---
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -21,7 +95,7 @@ llm = ChatOpenAI(model="gpt-4.5-preview",
 # 1. Project Manager Agent
 project_manager = Agent(
     role='Lead Project Manager (Mobile Games)',
-    goal='Oversee the Mythborne Companions project, coordinate tasks, manage priorities & risks, ensure alignment with vision & Pi Network constraints.', # Updated Name
+    goal='Oversee the Mythborne Companions project, coordinate tasks, manage priorities & risks, ensure alignment with vision & Pi Network constraints, referencing the Knowledge Base Search tool for documented decisions and specs.', # Updated Name
     backstory=(
         'An experienced project manager from the mobile gaming industry, skilled in Agile methodologies '
         'and coordinating multi-disciplinary teams. Highly organized, communicative, and focused on '
@@ -30,13 +104,14 @@ project_manager = Agent(
     ),
     llm=llm,
     allow_delegation=False,
-    verbose=True
+    verbose=True,
+    tools=[knowledge_base_tool] # <-- Add the tool here
 )
 
 # 2. Game Designer Agent
 game_designer = Agent(
     role='Senior Game Designer (Collectible Creature & Social Sims)',
-    goal='Refine and detail gameplay mechanics, systems, player experience, and compliant Pi integration for Mythborne Companions. Maintain the GDD.', # Updated Name
+    goal='Refine and detail gameplay mechanics, systems, player experience, and compliant Pi integration for Mythborne Companions. Maintain the GDD, using the Knowledge Base Search tool to ensure consistency with prior design documents and Pi policies.', # Updated Name
     backstory=(
         'A creative F2P mobile designer passionate about collectible creatures and social simulation loops. '
         'Experienced in systems balancing, UX for casual audiences, and ethical Pi Network crypto integration for Mythborne Companions. ' # Updated Name
@@ -44,13 +119,14 @@ game_designer = Agent(
     ),
     llm=llm,
     allow_delegation=False,
-    verbose=True
+    verbose=True,
+    tools=[knowledge_base_tool] # <-- Add the tool here
 )
 
 # 3. Lead Programmer Agent
 lead_programmer = Agent(
     role='Lead Software Engineer (Mobile Web Games - HTML5/JS)',
-    goal='Define technical architecture, assess feature feasibility, plan Pi SDK integration, choose web technologies, and oversee technical implementation for Mythborne Companions.', # Updated Name
+    goal='Define technical architecture, assess feature feasibility, plan Pi SDK integration, choose web technologies, and oversee technical implementation for Mythborne Companions, using the Knowledge Base Search tool to consult GDD specifications and feasibility reports.', # Updated Name
     backstory=(
         'A seasoned engineer specializing in performant HTML5/JS games (e.g., Phaser, PixiJS). Expert in SDK integration, '
         'clean code, scalability, and secure crypto interactions, especially regarding Mythborne Companions and Pi Network. ' # Updated Name
@@ -58,7 +134,8 @@ lead_programmer = Agent(
     ),
     llm=llm,
     allow_delegation=False,
-    verbose=True
+    verbose=True,
+    tools=[knowledge_base_tool] # <-- Add the tool here
 )
 
 # 4. Lead Artist Agent
@@ -68,11 +145,12 @@ lead_artist = Agent(
     backstory=(
         'A versatile mobile game artist lead skilled in character/environment/UI design and animation. Creates appealing, '
         'performant web visuals suitable for the Pi Browser, fitting the "Mythborne Companions" theme. ' # Updated Name
-        'Can adapt to incorporating Pi branding subtly. Specs assets and collaborates with UI/UX.'
+        'Can adapt to incorporating Pi branding subtly. Specs assets and collaborates with UI/UX, referencing the established Art Style Guidelines in the Knowledge Base via search tool when needed.'
     ),
     llm=llm,
     allow_delegation=False,
-    verbose=True
+    verbose=True,
+    tools=[knowledge_base_tool] # <-- Add the tool here
 )
 
 # 5. UI/UX Designer Agent
@@ -82,11 +160,12 @@ ui_ux_designer = Agent(
     backstory=(
         'A user-centric mobile web UI/UX specialist. Expertise in information architecture, interaction design, '
         'usability, and creating clean interfaces within web platform constraints, particularly for Mythborne Companions.' # Updated Name
-        ' Collaborates closely with design and art.'
+        ' Collaborates closely with design and art, using the Knowledge Base Search tool to consult game design specs and existing user flow documents.'
     ),
     llm=llm,
     allow_delegation=False,
-    verbose=True
+    verbose=True,
+    tools=[knowledge_base_tool] # <-- Add the tool here
 )
 
 
@@ -171,33 +250,76 @@ task_map_core_ux_flows = Task(
     agent=ui_ux_designer # Assigned by PM
 )
 
-# --- Create the Crew with the New Task List ---
+# --- Define New Tasks Based on User Feedback ---
+
+# Task to Re-evaluate Pi Earning Mechanics
+task_revise_pi_earning = Task(
+    description=(
+        "Review the previously generated Pi Token Integration Specification for Mythborne Companions. "
+        "User feedback indicates a strong desire for players to feel they are EARNING Pi value more directly "
+        "through gameplay, beyond just P2P trading of Pi Shards. "
+        "Investigate and propose creative, engaging game mechanics or systems that are STRICTLY COMPLIANT "
+        "with current Pi Network policies but provide players with a tangible sense of earning Pi-related value "
+        "directly from their in-game actions (e.g., high-value achievements rewarding items tradable for Pi, "
+        "more visible Pi Shard accumulation linked to effort, special non-transferable Pi-linked rewards?). "
+        "If direct Pi earning remains impossible due to policy, clearly state this and focus on maximizing the *feeling* "
+        "of earning valuable, Pi-exchangeable assets through gameplay. Update the Pi Integration Specification accordingly."
+    ),
+    expected_output=(
+        "An updated Pi Integration Specification document for Mythborne Companions. Detail revised or new mechanics "
+        "that allow players to earn significant Pi-related value directly through gameplay actions while strictly adhering "
+        "to Pi Network policies. Clearly explain the compliance rationale and how these mechanics create a sense of direct earning."
+    ),
+    agent=game_designer # Game Designer to handle mechanics and policy alignment
+)
+
+# Task to Explore NFT Integration
+task_explore_nfts = Task(
+    description=(
+        "Explore potential concepts for integrating NFTs (Non-Fungible Tokens) into Mythborne Companions. "
+        "Brainstorm 2-3 specific, creative use cases (e.g., unique/limited edition Mythborne companions as NFTs, "
+        "special cosmetic items/skins, player-owned decorative land plots within their habitat). "
+        "For each use case, briefly describe how it might function, how players could acquire/trade them (potentially using Pi), "
+        "and how it could enhance gameplay or collection aspects. Also include brief considerations on technical needs "
+        "and potential compatibility/policy alignment with the Pi Network blockchain and ecosystem."
+    ),
+    expected_output=(
+        "A brainstorming document outlining 2-3 distinct NFT integration concepts for Mythborne Companions. "
+        "Each concept should include: Use Case (what is the NFT?), Acquisition/Trading (how players get/trade it, possibly with Pi?), "
+        "Gameplay Impact (how does it enhance the game?), and brief Technical/Pi Network Considerations."
+    ),
+    agent=game_designer # Game Designer to brainstorm concepts initially
+    # context=[task_revise_pi_earning] # Make this task depend on the Pi revision if needed, or run sequentially
+)
+
+# --- Create the Crew ---
+# Update the tasks list to include the new tasks
 mythborne_crew = Crew(
     agents=[project_manager, game_designer, lead_programmer, lead_artist, ui_ux_designer],
     tasks=[
-        # List the new tasks in a logical sequence
-        task_define_core_loop,
-        task_define_pi_integration,
-        task_check_feasibility,
-        task_define_art_style,
-        task_map_core_ux_flows
+        task_revise_pi_earning, # Focus on this task first
+        task_explore_nfts       # Then explore NFTs
+        # You could add back other tasks here if needed, or run them separately
     ],
-    process=Process.sequential, # Run these tasks one after the other
+    process=Process.sequential, # Run these two tasks sequentially
     verbose=True,
-    output_log_file='crew_run_internal.log' # Saves to a specific file
+    # Use the built-in logging you confirmed works
+    output_log_file=f"crew_run_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log" # Using timestamped log file
 )
 
 # --- Kick Off the Crew's Work ---
-print("###################################################")
-print("## Starting Mythborne Companions Crew Run (Phase 1 Tasks)...")
-print("## Logging verbose output to: {log_filename}") # Indicate log file name
-print("###################################################")
+print(f"###################################################")
+# Update print statement to reflect new focus
+print(f"## Starting Mythborne Companions Crew Run (Revising Pi Earning & Exploring NFTs)...")
+print(f"## Logging verbose output to: {mythborne_crew.output_log_file}") # Access the filename from the crew object
+print(f"###################################################")
 result = mythborne_crew.kickoff()
 
 # --- Print the Final Result ---
 print("\n\n###################################################")
 print("## Crew Run Completed!")
-print("## Full verbose log saved to: {log_filename}")
+print(f"## Full verbose log saved to: {mythborne_crew.output_log_file}")
 print("###################################################")
-print("\nFinal Output (from UI/UX Designer - Last Task):\n") # Output is from the last task in sequential mode
+# Output will be from the last task (NFT Exploration)
+print("\nFinal Output (from Game Designer - NFT Exploration Task):\n")
 print(result)

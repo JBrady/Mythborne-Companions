@@ -1,0 +1,55 @@
+Task 2: Specify Pi Token Integrations
+Agent: Senior Game Designer (Collectible Creature & Social Sims)
+Output: Mythborne Companions - Pi Network Token Integration Specification
+Overview: Pi tokens will be ethically and compliantly integrated into Mythborne Companions gameplay loops following Pi Network's Technical Guidelines and Platform Policies. These integrations will strictly avoid scenarios resembling gambling, pay-to-win mechanics, or speculative investment activities. Pi Network explicitly prohibits direct Pi mining within apps; thus, players cannot directly earn Pi tokens through gameplay. Instead, players will earn the in-game resource "Pi Shards," convertible into Pi tokens through authorized marketplace transactions, adhering strictly to Pi Network policies.
+
+
+Pi Token Integration Details:
+I. Pi Token Earning Mechanics (Policy-Compliant Constraints):
+As per Pi Network guidelines, direct earning of Pi tokens through gameplay actions is strictly prohibited. Players will not directly earn Pi tokens by playing Mythborne Companions.
+Instead, players earn "Pi Shards," an in-game resource through active gameplay (exploration, battling, crafting, social interactions). Pi Shards serve as an intermediate resource entirely within the game ecosystem.
+Players can securely trade Pi Shards via the integrated Pi marketplace for Pi tokens with other players, thus indirectly earning Pi by exchanging their earned in-game resource with others. This peer-to-peer marketplace transaction aligns with Pi Network's compliant and ethical integration policies.
+Example Pi Shard Earning Rates (Indicative):
+
+Exploration Missions: 10-25 Pi Shards per completed mission.
+PvE Battles: 5-15 Pi Shards per successful battle.
+Special Weekly Events: 50-100 Pi Shards upon event completion.
+Crafting Special Recipes: 10-30 Pi Shards per completed special crafting task.
+
+
+II. Pi Token Spending Mechanics (Policy-Compliant & Ethical):Players will have clear, meaningful, and compliant opportunities to spend Pi tokens within Mythborne Companions, facilitating a healthy token economy while adhering strictly to Pi Network guidelines:
+Cosmetic Customizations:
+Unique companion skins: 0.5-2 Pi each
+Exclusive home base decorations: 0.2-1 Pi each
+Mythkeeper Avatar outfits & accessories: 0.5-1.5 Pi each
+(These cosmetic items are strictly visual without gameplay advantages, ensuring ethical compliance.)
+
+Gameplay Convenience & Quality-of-Life Enhancements (Balanced & Ethical):
+Speeding up crafting timers: 0.1-0.5 Pi per acceleration (capped usage per day to maintain fairness)
+Expanding companion storage space: 1-3 Pi per additional slot
+Instant companion egg hatching (purely time-based convenience): 0.2-0.8 Pi per egg
+Special Crafting & Exclusive Recipes (Non-Pay-to-Win):
+Exclusive cosmetic crafting blueprints: 1-2 Pi each
+Limited-time special crafting recipes (cosmetic or convenience-only): 0.5-1.5 Pi each
+
+
+III. Marketplace Integration for Pi Transactions (Strictly Compliant):
+Players utilize a secure, integrated Pi-compatible marketplace platform that adheres to Pi Network policies, facilitating peer-to-peer trades where players exchange Pi tokens for in-game items, Pi Shards, and collectibles.
+All marketplace transactions comply with Pi Network's technical guidelines, requiring explicit player-initiated Pi wallet authorization and transparent transaction tracking.
+Prices set by players; marketplace provides safeguards, clear disclosures, and anti-fraud protections compliant with Pi Network guidelines.
+Example Marketplace Transactions (Indicative Player-Driven Pricing):
+Companion Egg (rare species): 1-5 Pi
+Companion Shards (common species): bundle of 10 shards at 0.5 Pi
+Rare crafting materials: bundles for 0.2-1 Pi
+Pi Shards: 100 Pi Shards traded amongst players for approximately 0.5-1 Pi (indicative exchange rate)
+
+
+IV. Alignment with Pi Network Technical Guidelines & Policies:This integration strictly complies with Pi Network's official guidelines, including but not limited to:
+NO direct Pi mining or crypto token generation through gameplay actions.
+NO speculative investment, gambling mechanics, or pay-to-win scenarios.
+Explicit user consent and secure authorization before all Pi token transactions.
+Complete transparency regarding Pi token usage, pricing, and transactions.
+Regular communication and coordination with Pi Network authorities to ensure ongoing compliance and policy alignment.
+
+
+By implementing these integrations, Mythborne Companions ensures a meaningful, ethical, player-driven Pi token economy, fully compliant with Pi Network's technical guidelines and platform policies, enhancing player experience without compromising fairness or ethical standards.End of Specification Document.

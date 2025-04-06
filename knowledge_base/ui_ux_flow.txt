@@ -1,0 +1,21 @@
+Task 5: Map Out Initial High-Level UI/UX User Flows
+Agent: UI/UX Designer (Mobile Web)
+Output:Mythborne Companions - High-Level UI/UX User Flow Document
+
+I. Companion Management Flow:
+Step 1: Home Base/Main Screen: Start on main screen with companions, habitats, resources, nav menu. Bottom nav: "Home", "Companions", "Explore", "Craft", "Marketplace".
+Step 2: Companion Overview Screen: Tap "Companions". See scrollable list/grid of companions (thumbnail, name, level, status). Sort/filter options.
+Step 3: Companion Detail Screen: Tap a companion. See full art, name, level, XP, stats, emotional state, evolution bar. Tabs/Buttons: "Stats & Skills", "Interactions", "Customization".
+Step 4: Interactions Tab: Buttons: "Feed", "Play", "Groom". Tap "Feed" -> modal with food items -> select item -> visual feedback (animation, happiness update).
+Step 5: Initiating Evolution (if applicable): "Evolve" button appears when ready -> tap -> confirmation modal (shows requirements met) -> tap confirm -> evolution animation -> profile updates.
+
+II. Pi Token Transaction Flow (Purchasing an Item):
+Step 1: Shop Screen (Pi Marketplace): Access via "Marketplace" nav icon. Tabs: "Featured", "Cosmetics", "Resources", etc. Pi balance visible in header.
+Step 2: Selecting an Item: Select tab (e.g., "Cosmetics"). View scrollable item cards (thumbnail, description, Pi cost, "Purchase" button).
+Step 3: Initiating Purchase: Tap "Purchase". Confirmation modal appears (item details, Pi cost, balance before/after). Tap "Confirm Purchase".
+Step 4: Pi Token Transaction Authentication: Pi Wallet auth modal appears (via Pi SDK). User authenticates securely via Pi Wallet.
+Step 5: Transaction Processing & Confirmation: Loading indicator shown. On blockchain confirmation -> "Purchase Successful!" message/modal. Pi balance updates visually.
+Step 6: Item Delivery & Confirmation: "New Item Added!" notification. Option to "View Item" in inventory. Item highlighted in inventory.
+
+
+Design Principles Ensured: Clarity, Ease of Use, Visual Appeal, Accessibility, Transparency & Trust.

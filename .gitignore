@@ -14,3 +14,6 @@ venv/
 
 # Log files
 *.log*
+
+# Vector Database (Generated locally)
+chroma_db/
