@@ -1,8 +1,13 @@
 import os
 from crewai import Agent, Task, Crew, Process
-# Using OpenAI based on your last successful run
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
+from datetime import datetime # Import datetime
+
+# --- Generate a unique log filename ---
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+log_filename = f"crew_run_{timestamp}.log"
+# --- End of filename generation ---
 
 load_dotenv() # Load environment variables from .env file (ensure OPENAI_API_KEY is set)
 
@@ -85,43 +90,114 @@ ui_ux_designer = Agent(
 )
 
 
-# --- Define Initial Task(s) ---
+# --- Define Tasks Based on Project Manager's Plan ---
 
-# Task for the Project Manager to outline the next steps for the GDD
-task_plan_gdd_refinement = Task(
+# Task 1 (PM Output Item 1)
+task_define_core_loop = Task(
     description=(
-        'Review the project status for "Mythborne Companions" (Phase 1 Start). The goal is to refine the initial GDD draft. ' # Updated Name
-        'Based on the defined roles for the Game Designer, Lead Programmer, Lead Artist, and UI/UX Designer, '
-        'create a prioritized list of the top 3-5 immediate tasks or critical questions that need to be addressed '
-        'to clarify the GDD requirements (e.g., core loop details, specific Pi integrations, art style direction, '
-        'UI flow for key features). For each item, suggest the primary agent role responsible for leading the answer or task.'
+        'Based on the initial concept for Mythborne Companions, clearly define the core gameplay loop. '
+        'Detail the primary player objectives, core actions (e.g., exploring, collecting, crafting, battling/mini-games), '
+        'progression mechanics (e.g., leveling up companions, unlocking features), and how players interact '
+        'meaningfully with their Mythborne companions.'
     ),
     expected_output=(
-        'A numbered list of 3-5 prioritized tasks or critical questions for GDD refinement for Mythborne Companions. ' # Updated Name
-        'Each item should include a brief description and the suggested primary responsible agent role '
-        '(e.g., "1. Define specific Pi token earning/spending actions - Game Designer", '
-        '"2. Confirm technical feasibility of proposed mini-game X - Lead Programmer", etc.).'
+        'A document section detailing the core gameplay loop for Mythborne Companions, covering player objectives, '
+        'core actions, progression systems, and key companion interactions.'
     ),
-    agent=project_manager # Assign this initial planning task to the Project Manager
+    agent=game_designer # Assigned by PM
 )
 
-# --- Create the Crew ---
-mythborne_crew = Crew( # Updated Crew variable name
+# Task 2 (PM Output Item 2)
+task_define_pi_integration = Task(
+    description=(
+        'Specify the exact Pi token integrations for Mythborne Companions. Detail potential ways players might earn Pi '
+        '(if allowed by Pi Network policies, specify this constraint) and clear ways they can spend Pi within the game '
+        '(e.g., for cosmetic items, speeding up timers, special crafting recipes, companion slots). '
+        'Crucially, ensure these mechanics strictly align with current Pi Network technical guidelines and platform policies.'
+    ),
+    expected_output=(
+        'A specification document detailing proposed Pi earning (if applicable) and spending mechanics. '
+        'Include example costs/rewards in Pi. Explicitly state how alignment with Pi Network policies will be maintained.'
+    ),
+    agent=game_designer # Assigned by PM
+)
+
+# Task 3 (PM Output Item 3)
+task_check_feasibility = Task(
+    description=(
+        'Evaluate the technical feasibility of integrating the proposed Pi Network functionalities '
+        '(wallet interaction, transaction handling for Pi spending/earning actions defined in the previous task) '
+        'into Mythborne Companions using the Pi SDK/APIs. Consider potential blockchain constraints (e.g., transaction times, fees), '
+        'API limitations, security best practices, and the impact on the likely mobile web technology stack (HTML5/JS). '
+        'Outline potential challenges and recommended technical approaches or solutions.'
+    ),
+    expected_output=(
+        'A technical feasibility report covering Pi SDK/API integration for the defined mechanics. '
+        'Highlight potential challenges (latency, security, policy compliance), constraints, '
+        'and recommended technical solutions or necessary workarounds.'
+    ),
+    agent=lead_programmer # Assigned by PM
+)
+
+# Task 4 (PM Output Item 4)
+task_define_art_style = Task(
+    description=(
+        'Establish initial visual art style guidelines for Mythborne Companions. Provide text descriptions '
+        'and optionally list key visual references or inspirations (e.g., specific games, art styles) that define the '
+        'desired look and feel for the Mythborne companions (creatures), game environments, and UI elements. '
+        'The style should be appealing, consistent with the "Mythborne" theme, suitable for the Pi Network community, '
+        'and technically feasible for performant mobile web rendering.'
+    ),
+    expected_output=(
+        'A brief document outlining the proposed art style direction (e.g., "Stylized 2D Cartoon", "Semi-Realistic Fantasy"). '
+        'Include descriptions of the desired look for companions, environments, and UI. List 2-3 visual reference points if possible.'
+    ),
+    agent=lead_artist # Assigned by PM
+)
+
+# Task 5 (PM Output Item 5)
+task_map_core_ux_flows = Task(
+    description=(
+        'Map out the initial high-level UI/UX user flows for 2-3 core features of Mythborne Companions. '
+        'Focus on: (1) Companion Management (viewing stats, feeding/interacting, initiating evolution if applicable) '
+        'and (2) a key flow involving Pi token transactions (e.g., purchasing an item from a shop with Pi). '
+        'Describe the steps the user takes and the screens they interact with, prioritizing intuitive navigation '
+        'and a smooth experience on mobile web.'
+    ),
+    expected_output=(
+        'A document describing the step-by-step user flow for Companion Management and a Pi Transaction screen. '
+        'Use text descriptions for each step and screen involved. Focus on clarity and ease of use.'
+    ),
+    agent=ui_ux_designer # Assigned by PM
+)
+
+# --- Create the Crew with the New Task List ---
+mythborne_crew = Crew(
     agents=[project_manager, game_designer, lead_programmer, lead_artist, ui_ux_designer],
-    tasks=[task_plan_gdd_refinement], # Start with just the PM's planning task
-    process=Process.sequential,
-    verbose=True
+    tasks=[
+        # List the new tasks in a logical sequence
+        task_define_core_loop,
+        task_define_pi_integration,
+        task_check_feasibility,
+        task_define_art_style,
+        task_map_core_ux_flows
+    ],
+    process=Process.sequential, # Run these tasks one after the other
+    verbose=True,
+    output_log_file='crew_run_internal.log' # Saves to a specific file
 )
 
 # --- Kick Off the Crew's Work ---
-print("##############################################")
-print("## Starting Mythborne Companions Crew Run (Phase 1)...") # Updated Print Statement
-print("##############################################")
-result = mythborne_crew.kickoff() # Updated Crew variable name
+print("###################################################")
+print("## Starting Mythborne Companions Crew Run (Phase 1 Tasks)...")
+print("## Logging verbose output to: {log_filename}") # Indicate log file name
+print("###################################################")
+result = mythborne_crew.kickoff()
 
 # --- Print the Final Result ---
-print("\n\n##############################################")
+print("\n\n###################################################")
 print("## Crew Run Completed!")
-print("##############################################")
-print("\nFinal Output (from Project Manager):\n")
+print("## Full verbose log saved to: {log_filename}")
+print("###################################################")
+print("\nFinal Output (from UI/UX Designer - Last Task):\n") # Output is from the last task in sequential mode
 print(result)

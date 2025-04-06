@@ -11,3 +11,6 @@ __pycache__/
 # Potential virtual environment folders
 venv/
 .venv/
+
+# Log files
+*.log*
