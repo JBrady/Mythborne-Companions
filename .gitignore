@@ -18,6 +18,9 @@ logs/
 # Vector DB Data
 chroma_db/
 
+# Source documents for RAG (often project-specific or potentially sensitive)
+knowledge_base/
+
 # IDE specific folders
 .vscode/
 .idea/
