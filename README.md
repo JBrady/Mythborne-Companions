@@ -33,13 +33,15 @@ The agents collaborate to define game design elements, technical specifications,
         pip install -r requirements.txt
         ```
 
-3.  **Knowledge Base Index:**
-    *   The agents use a local vector database (ChromaDB) to reference project documents stored in the `knowledge_base` directory.
-    *   Create the initial index by running:
+3.  **Knowledge Base & Index:**
+    *   The agents use a local vector database (ChromaDB in the `chroma_db/` directory) which needs to be populated with project documents.
+    *   Create a directory named `knowledge_base/` in the project root (this directory is not tracked by Git).
+    *   Place your source documents (e.g., .txt, .md files) inside the `knowledge_base/` directory.
+    *   Generate or update the ChromaDB index from these documents by running:
         ```bash
         python create_index.py
         ```
-    *   **Important:** You must re-run `python create_index.py` *any time* you add, remove, or modify files in the `knowledge_base` directory to keep the index up-to-date.
+    *   **Important:** You must re-run `python create_index.py` *any time* you add, remove, or modify files in your local `knowledge_base/` directory to keep the `chroma_db/` index up-to-date.
 
 ## Usage
 
@@ -47,7 +49,7 @@ The agents collaborate to define game design elements, technical specifications,
     ```bash
     python main.py
     ```
-*   Verbose output will be printed to the console, and a detailed log file (e.g., `crew_run_YYYYMMDD_HHMMSS.log`) will be saved in the project root.
+*   Verbose output will be printed to the console, and a detailed log file (e.g., `crew_run_YYYYMMDD_HHMMSS.log.txt`) will be saved in the `logs/` directory.
 *   The final output of the last task in the sequence will be printed at the end.
 
 ## Knowledge Base
