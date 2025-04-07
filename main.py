@@ -164,157 +164,100 @@ ui_ux_designer = Agent(
 )
 
 
-# --- Define Tasks Based on Project Manager's Plan ---
+# --- Task Definitions ---
 
-# Task 1 (PM Output Item 1)
-task_define_core_loop = Task(
+# Task 1: Project Manager - Review Sprint 1 Outputs
+task_pm_review_sprint1 = Task(
     description=(
-        'Based on the initial concept for Mythborne Companions, clearly define the core gameplay loop. '
-        'Detail the primary player objectives, core actions (e.g., exploring, collecting, crafting, battling/mini-games), '
-        'progression mechanics (e.g., leveling up companions, unlocking features), and how players interact '
-        'meaningfully with their Mythborne companions.'
+        "Review the outputs from the first implementation sprint. Use the Knowledge Base Search tool to examine: "
+        "1) The Lead Programmer's description of the implemented Pi wallet connection logic. "
+        "2) The Game Designer's detailed design for the first NFT event. "
+        "3) The Lead Programmer's description of the implemented NFT viewing UI. "
+        "Assess these outputs for alignment with the implementation plan, technical feasibility, and readiness for the next sprint's integration tasks. "
+        "Identify any immediate issues or necessary adjustments."
     ),
     expected_output=(
-        'A document section detailing the core gameplay loop for Mythborne Companions, covering player objectives, '
-        'core actions, progression systems, and key companion interactions.'
+        "A review summary document assessing Sprint 1 outputs, confirming alignment or highlighting specific issues/adjustments needed before proceeding with deeper implementation."
     ),
-    agent=game_designer # Assigned by PM
+    agent=project_manager,
+    context=[] # Assumes PM uses KB Search
 )
 
-# Task 2 (PM Output Item 2)
-task_define_pi_integration = Task(
+# Task 2: Game Designer - Detail NFT Mechanics
+task_detail_nft_mechanics = Task(
+  description=(
+    "Based on previous feedback from the Project Manager review (Sprint 1) and the existing NFT concepts document (use Knowledge Base Search tool to reference 'nft_integration_concepts_v1.txt' or similar), provide a detailed specification for NFT implementation mechanics in Mythborne Companions. "
+    "Specifically address: "
+    "1. **Detailed Rarity Tiers:** Define the exact number of tiers (e.g., 5 tiers: Common, Uncommon, Rare, Epic, Legendary), their approximate distribution percentages or mint limits, and the specific visual or minor non-P2W gameplay distinctions for each tier. "
+    "2. **Distribution Mechanisms:** Elaborate on *how* players acquire NFTs for each proposed method (Seasonal Events, Lottery Draws, Achievements, Collaborations). Detail the player actions required, probabilities (if applicable), and frequency for each mechanism. "
+    "3. **Pi/NFT Marketplace Interaction:** Explicitly define if NFTs can be listed/purchased directly for Pi tokens in the P2P marketplace. If so, describe the flow and any proposed platform fees or rules. If not, clarify that trading happens via Pi Shards which are then traded for Pi."
+  ),
+  expected_output=(
+    "A detailed specification document covering: "
+    "1) Defined NFT rarity tiers with names, distribution details, and distinctions. "
+    "2) Detailed descriptions of each NFT distribution mechanism (events, lottery, achievements, etc.). "
+    "3) Clear rules and flow diagrams/descriptions for Pi/NFT economic interactions in the marketplace."
+  ),
+  agent=game_designer,
+  context=[task_pm_review_sprint1] # Depends on PM review identifying the need for details
+)
+
+# Task 3: Lead Programmer - Implement NFT Event Backend Logic
+task_lp_implement_event_backend = Task(
     description=(
-        'Specify the exact Pi token integrations for Mythborne Companions. Detail potential ways players might earn Pi '
-        '(if allowed by Pi Network policies, specify this constraint) and clear ways they can spend Pi within the game '
-        '(e.g., for cosmetic items, speeding up timers, special crafting recipes, companion slots). '
-        'Crucially, ensure these mechanics strictly align with current Pi Network technical guidelines and platform policies.'
+        "Based on the Game Designer's detailed design for the first NFT event (provided as context/found in KB) and the existing code scaffold, implement the backend logic required for this event. "
+        "Focus on quest tracking/completion checks, reward calculation, and interfacing with the placeholder NFT minting/distribution handler defined in the scaffold. "
+        "Do not implement the actual blockchain minting yet, just the game-side logic."
     ),
     expected_output=(
-        'A specification document detailing proposed Pi earning (if applicable) and spending mechanics. '
-        'Include example costs/rewards in Pi. Explicitly state how alignment with Pi Network policies will be maintained.'
+        "A description of the implemented backend logic for the first NFT event, detailing the key modules/functions created, how they handle event progression and rewards, "
+        "and how they interface with the NFT handler scaffold. (No raw code output expected)."
     ),
-    agent=game_designer # Assigned by PM
+    agent=lead_programmer,
+    context=[task_detail_nft_mechanics] # Depends on detailed NFT mechanics
 )
 
-# Task 3 (PM Output Item 3)
-task_check_feasibility = Task(
+# Task 4: UI/UX Designer - Design Marketplace Transaction Flow
+task_ui_design_marketplace = Task(
     description=(
-        'Evaluate the technical feasibility of integrating the proposed Pi Network functionalities '
-        '(wallet interaction, transaction handling for Pi spending/earning actions defined in the previous task) '
-        'into Mythborne Companions using the Pi SDK/APIs. Consider potential blockchain constraints (e.g., transaction times, fees), '
-        'API limitations, security best practices, and the impact on the likely mobile web technology stack (HTML5/JS). '
-        'Outline potential challenges and recommended technical approaches or solutions.'
+        "Based on the approved specifications and UI mockups, design the detailed user interaction flow for the NFT marketplace transaction process. "
+        "Cover the steps for listing an NFT for sale, browsing listings, initiating a purchase using Pi (triggering the wallet flow), confirming the transaction, "
+        "and handling the UI updates upon success or failure. Create detailed wireframes or flow descriptions."
     ),
     expected_output=(
-        'A technical feasibility report covering Pi SDK/API integration for the defined mechanics. '
-        'Highlight potential challenges (latency, security, policy compliance), constraints, '
-        'and recommended technical solutions or necessary workarounds.'
+        "Detailed wireframes or a flow document illustrating the step-by-step user journey for NFT marketplace transactions involving Pi wallet authorization."
     ),
-    agent=lead_programmer # Assigned by PM
+    agent=ui_ux_designer,
+    context=[task_detail_nft_mechanics] # Run after GD details NFT mechanics
 )
 
-# Task 4 (PM Output Item 4)
-task_define_art_style = Task(
-    description=(
-        'Establish initial visual art style guidelines for Mythborne Companions. Provide text descriptions '
-        'and optionally list key visual references or inspirations (e.g., specific games, art styles) that define the '
-        'desired look and feel for the Mythborne companions (creatures), game environments, and UI elements. '
-        'The style should be appealing, consistent with the "Mythborne" theme, suitable for the Pi Network community, '
-        'and technically feasible for performant mobile web rendering.'
-    ),
-    expected_output=(
-        'A brief document outlining the proposed art style direction (e.g., "Stylized 2D Cartoon", "Semi-Realistic Fantasy"). '
-        'Include descriptions of the desired look for companions, environments, and UI. List 2-3 visual reference points if possible.'
-    ),
-    agent=lead_artist # Assigned by PM
-)
-
-# Task 5 (PM Output Item 5)
-task_map_core_ux_flows = Task(
-    description=(
-        'Map out the initial high-level UI/UX user flows for 2-3 core features of Mythborne Companions. '
-        'Focus on: (1) Companion Management (viewing stats, feeding/interacting, initiating evolution if applicable) '
-        'and (2) a key flow involving Pi token transactions (e.g., purchasing an item from a shop with Pi). '
-        'Describe the steps the user takes and the screens they interact with, prioritizing intuitive navigation '
-        'and a smooth experience on mobile web.'
-    ),
-    expected_output=(
-        'A document describing the step-by-step user flow for Companion Management and a Pi Transaction screen. '
-        'Use text descriptions for each step and screen involved. Focus on clarity and ease of use.'
-    ),
-    agent=ui_ux_designer # Assigned by PM
-)
-
-# --- Define New Tasks Based on User Feedback ---
-
-# Task to Re-evaluate Pi Earning Mechanics
-task_revise_pi_earning = Task(
-    description=(
-        "Review the previously generated Pi Token Integration Specification for Mythborne Companions. "
-        "User feedback indicates a strong desire for players to feel they are EARNING Pi value more directly "
-        "through gameplay, beyond just P2P trading of Pi Shards. "
-        "Investigate and propose creative, engaging game mechanics or systems that are STRICTLY COMPLIANT "
-        "with current Pi Network policies but provide players with a tangible sense of earning Pi-related value "
-        "directly from their in-game actions (e.g., high-value achievements rewarding items tradable for Pi, "
-        "more visible Pi Shard accumulation linked to effort, special non-transferable Pi-linked rewards?). "
-        "If direct Pi earning remains impossible due to policy, clearly state this and focus on maximizing the *feeling* "
-        "of earning valuable, Pi-exchangeable assets through gameplay. Update the Pi Integration Specification accordingly."
-    ),
-    expected_output=(
-        "An updated Pi Integration Specification document for Mythborne Companions. Detail revised or new mechanics "
-        "that allow players to earn significant Pi-related value directly through gameplay actions while strictly adhering "
-        "to Pi Network policies. Clearly explain the compliance rationale and how these mechanics create a sense of direct earning."
-    ),
-    agent=game_designer # Game Designer to handle mechanics and policy alignment
-)
-
-# Task to Explore NFT Integration
-task_explore_nfts = Task(
-    description=(
-        "Explore potential concepts for integrating NFTs (Non-Fungible Tokens) into Mythborne Companions. "
-        "Brainstorm 2-3 specific, creative use cases (e.g., unique/limited edition Mythborne companions as NFTs, "
-        "special cosmetic items/skins, player-owned decorative land plots within their habitat). "
-        "For each use case, briefly describe how it might function, how players could acquire/trade them (potentially using Pi), "
-        "and how it could enhance gameplay or collection aspects. Also include brief considerations on technical needs "
-        "and potential compatibility/policy alignment with the Pi Network blockchain and ecosystem."
-    ),
-    expected_output=(
-        "A brainstorming document outlining 2-3 distinct NFT integration concepts for Mythborne Companions. "
-        "Each concept should include: Use Case (what is the NFT?), Acquisition/Trading (how players get/trade it, possibly with Pi?), "
-        "Gameplay Impact (how does it enhance the game?), and brief Technical/Pi Network Considerations."
-    ),
-    agent=game_designer # Game Designer to brainstorm concepts initially
-    # context=[task_revise_pi_earning] # Make this task depend on the Pi revision if needed, or run sequentially
-)
-
-# --- Create the Crew ---
-# Update the tasks list to include the new tasks
-mythborne_crew = Crew(
+# --- Crew Definition --- Change the tasks list here for different runs
+crew = Crew(
     agents=[project_manager, game_designer, lead_programmer, lead_artist, ui_ux_designer],
-    tasks=[
-        task_revise_pi_earning, # Focus on this task first
-        task_explore_nfts       # Then explore NFTs
-        # You could add back other tasks here if needed, or run them separately
-    ],
-    process=Process.sequential, # Run these two tasks sequentially
-    verbose=True,
-    # Use the timestamped log file name generated earlier
-    output_log_file=log_filename
+    tasks=[task_pm_review_sprint1, task_detail_nft_mechanics, task_lp_implement_event_backend, task_ui_design_marketplace], # <<< Run Review, Detail NFT, Implement Backend, Design Marketplace
+    process=Process.sequential, # Tasks will be executed sequentially
+    verbose=True, # Verbose output level (True/False in newer versions)
+    # memory=True, # Enable memory for the crew (experimental)
+    # cache=True, # Enable caching for tool usage (experimental)
+    # max_rpm=100, # Maximum requests per minute limit
+    # share_crew=False # Option to share crew execution info (set to True for potential collaboration features)
+    manager_llm=llm, # Define the llm for the manager agent
+    output_log_file=log_filename # Specify the log file
 )
 
-# --- Kick Off the Crew's Work ---
+# --- Start the Crew's Work ---
 print("###################################################")
 # Update print statement to reflect new focus
-print("## Starting Mythborne Companions Crew Run (Revising Pi Earning & Exploring NFTs)...")
-print(f"## Logging verbose output to: {mythborne_crew.output_log_file}") # Access the filename from the crew object
+print("## Starting Mythborne Companions Crew Run (Review, Detail NFT, Implement Backend, Design Marketplace)...")
+print(f"## Logging verbose output to: {crew.output_log_file}") # Access the filename from the crew object
 print("###################################################")
-result = mythborne_crew.kickoff()
+result = crew.kickoff()
 
 # --- Print the Final Result ---
 print("\n\n###################################################")
 print("## Crew Run Completed!")
-print(f"## Full verbose log saved to: {mythborne_crew.output_log_file}")
+print(f"## Full verbose log saved to: {crew.output_log_file}")
 print("###################################################")
-# Output will be from the last task (NFT Exploration)
-print("\nFinal Output (from Game Designer - NFT Exploration Task):\n")
+# Output will be from the last task (UI/UX Designer - Marketplace Flow Design)
+print("\nFinal Output (from UI/UX Designer - Marketplace Transaction Flow Design Task):\n")
 print(result)

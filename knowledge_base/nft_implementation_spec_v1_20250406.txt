@@ -1,0 +1,125 @@
+Task 2: Game Designer - Detailed NFT Implementation Specification
+Agent: Senior Game Designer (Collectible Creature & Social Sims)
+
+Output:
+
+Detailed NFT Implementation Specification for Mythborne Companions
+
+1. Detailed Rarity Tiers:
+To ensure clarity and player engagement, NFTs in Mythborne Companions will be structured into five distinct rarity tiers:
+
+Common (45% of NFTs minted)
+
+Visual: Basic companion models with standard coloration and minimal particle effects.
+
+Gameplay: No gameplay advantage; purely aesthetic collectibles.
+
+Uncommon (30% of NFTs minted)
+
+Visual: Special coloration schemes, minor particle effects.
+
+Gameplay: Minor cosmetic animations (idle animations, emotes); no gameplay stats advantage.
+
+Rare (15% of NFTs minted)
+
+Visual: Exclusive coloration, moderate particle and animation effects.
+
+Gameplay: Unique companion animations and interaction emotes; no stats or gameplay advantage.
+
+Epic (8% of NFTs minted)
+
+Visual: High-quality models with complex particle effects and animations.
+
+Gameplay: Exclusive emotes and interactions; special unlockable companion-themed profile borders and banners; no gameplay stats advantage.
+
+Legendary (2% of NFTs minted)
+
+Visual: Unique, handcrafted designs with extensive particle and visual effects.
+
+Gameplay: Exclusive companion-themed player profile decorations, unique companion voice/sound effects; entirely aesthetic, no gameplay stats or power advantage.
+
+Mint Limits:
+
+Each rarity tier will initially have defined mint limits per seasonal event or collaboration:
+
+Common: Unlimited minting within event duration.
+
+Uncommon: Max 10,000 per event.
+
+Rare: Max 5,000 per event.
+
+Epic: Max 1,000 per event.
+
+Legendary: Max 200 per event.
+
+2. Distribution Mechanisms:
+NFTs will be distributed through four primary mechanisms, each clearly defined below:
+
+Seasonal Events:
+
+Frequency: Quarterly events lasting approximately two weeks.
+
+Player Actions Required: Participation in daily event quests, social interactions, and community challenges.
+
+Probabilities: NFTs awarded based on completed milestones; guaranteed Common/Uncommon NFTs, with probabilistic Rare (10%), Epic (3%), Legendary (0.5%) drops upon reaching advanced milestones.
+
+Lottery Draws:
+
+Frequency: Monthly lottery events.
+
+Player Actions Required: Players purchase lottery tickets using in-game earned currency or Pi Shards (clearly non-P2W).
+
+Probabilities: Common (60%), Uncommon (25%), Rare (10%), Epic (4%), Legendary (1%).
+
+Achievements:
+
+Frequency: Ongoing, persistent in-game achievements.
+
+Player Actions Required: Completing specific long-term milestones (e.g., collection size, social interactions, or gameplay hours).
+
+Probabilities: Deterministic; predefined reward rarity tier per achievement complexity. Generally Common, Uncommon, and Rare tiers only.
+
+Collaborations:
+
+Frequency: Occasional, as per collaboration agreements (approximately quarterly).
+
+Player Actions Required: Participation in special collaboration events or promotional activities.
+
+Probabilities: Deterministic rewards, usually Rare, Epic, or limited Legendary NFTs depending on collaboration scale and partner agreement.
+
+3. Pi/NFT Marketplace Interaction:
+NFT Trading Mechanics using Pi Network Integration:
+
+NFTs CAN be directly listed and purchased in the peer-to-peer marketplace using Pi Tokens:
+
+Players must authorize their Pi Wallet connection to list or purchase NFTs.
+
+Marketplace Flow:
+
+Seller chooses NFT to list and sets a Pi price.
+
+Seller confirms listing and authorizes Pi Wallet signature.
+
+Buyer browses marketplace, selects NFT, and initiates purchase.
+
+Buyer confirms purchase amount in Pi Tokens and authorizes Pi Wallet transaction.
+
+Pi Tokens are transferred securely between buyer and seller wallets.
+
+NFT transferred from seller's to buyer's inventory automatically upon successful Pi Token transaction confirmation.
+
+Platform Fees and Rules:
+
+A fixed platform transaction fee of 5% Pi Token value per NFT marketplace transaction.
+
+All transaction fees transparently displayed and deducted automatically upon transaction completion.
+
+Marketplace adheres strictly to Pi Network's guidelines and policies, ensuring regulatory compliance and transparency.
+
+Alternative Trading Method (Pi Shards):
+
+Players who prefer not to transact directly in Pi Tokens can use Pi Shards (in-game currency earned via gameplay or non-monetary activities).
+
+Pi Shards are exchangeable for Pi Tokens through a controlled in-game exchange, maintaining transparency and compliance.
+
+This detailed NFT specification provides critical clarity on rarity tiers, distribution mechanisms, and Pi/NFT marketplace interactions, ensuring alignment with the existing Pi and NFT integration concepts, Project Manager feedback, and Pi Network's compliance standards.
