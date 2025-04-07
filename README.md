@@ -32,6 +32,10 @@ The agents collaborate to define game design elements, technical specifications,
         ```bash
         pip install -r requirements.txt
         ```
+    *   To install development dependencies (linters, formatters):
+        ```bash
+        pip install -r requirements-dev.txt
+        ```
 
 3.  **Knowledge Base & Index:**
     *   The agents use a local vector database (ChromaDB in the `chroma_db/` directory) which needs to be populated with project documents.
