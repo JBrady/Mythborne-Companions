@@ -1,22 +1,26 @@
-# Environment variables
-.env
+# Virtual Environment
+venv/
+.venv/
 
 # Python cache
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
-# VSCode settings
-.vscode/
+# Logs
+logs/
+*.log
 
-# Potential virtual environment folders
-venv/
-.venv/
+# Secrets
+.env
 
-# Log files
-*.log*
-
-# Vector Database (Generated locally)
+# Vector DB Data
 chroma_db/
+
+# IDE specific folders
+.vscode/
+.idea/
 
 # Archive for old knowledge base files
 knowledge_base_archive/

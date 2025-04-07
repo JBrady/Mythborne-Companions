@@ -3,14 +3,19 @@ from datetime import datetime
 from crewai import Agent, Task, Crew, Process # Keep these from crewai
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
-from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_chroma import Chroma
+from langchain_huggingface import HuggingFaceEmbeddings
 from crewai.tools import tool # Corrected: Import decorator from crewai.tools
 
-# --- Generate a unique log filename ---
+# --- Configuration for Log Folder ---
+LOG_DIR = "logs" # Define the name of the log subfolder
+os.makedirs(LOG_DIR, exist_ok=True) # Create the folder if it doesn't exist
+
+# --- Generate a unique log filename INSIDE the log folder ---
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-log_filename = f"crew_run_{timestamp}.log"
-# --- End of filename generation ---
+log_filename_only = f"crew_run_{timestamp}.log" # Just the filename part
+log_filename = os.path.join(LOG_DIR, log_filename_only) # Combine directory and filename
+# --- End of log file setup ---
 
 load_dotenv() # Load environment variables from .env file (ensure OPENAI_API_KEY is set)
 
@@ -136,11 +141,11 @@ lead_programmer = Agent(
 # 4. Lead Artist Agent
 lead_artist = Agent(
     role='Lead Game Artist (Mobile Web)',
-    goal='Define visual style, create concept art, establish art pipeline, ensure cohesive and optimized visuals for Mythborne Companions on Pi Browser.', # Updated Name
+    goal='Define visual style, create concept art descriptions, establish art pipeline, ensure cohesive and optimized visuals for Mythborne Companions on Pi Browser, referencing UI specs and style guides from the knowledge base.', # Updated goal
     backstory=(
         'A versatile mobile game artist lead skilled in character/environment/UI design and animation. Creates appealing, '
-        'performant web visuals suitable for the Pi Browser, fitting the "Mythborne Companions" theme. ' # Updated Name
-        'Can adapt to incorporating Pi branding subtly. Specs assets and collaborates with UI/UX, referencing the established Art Style Guidelines in the Knowledge Base via search tool when needed.'
+        'performant web visuals suitable for the Pi Browser, fitting the "Mythborne Companions" theme. '
+        'Uses the Knowledge Base Search tool to consult UI specifications and established Art Style Guidelines when generating visual concepts or asset descriptions.' # Updated backstory
     ),
     llm=llm,
     allow_delegation=False,
@@ -259,33 +264,49 @@ task_lp_implement_event_backend_code = Task(
     context=[task_detail_nft_mechanics, task_lp_implement_event_backend]
 )
 
-# --- Crew Definition --- Change the tasks list here for different runs
-crew = Crew(
-    agents=[project_manager, game_designer, lead_programmer, lead_artist, ui_ux_designer],
-    tasks=[task_ui_refine_nft_viewing, task_lp_implement_event_backend_code], # <<< Run Refine NFT View UI, Implement Backend Code
-    process=Process.sequential, # Tasks will be executed sequentially
-    verbose=True, # Verbose output level (True/False in newer versions)
-    # memory=True, # Enable memory for the crew (experimental)
-    # cache=True, # Enable caching for tool usage (experimental)
-    # max_rpm=100, # Maximum requests per minute limit
-    # share_crew=False # Option to share crew execution info (set to True for potential collaboration features)
-    manager_llm=llm, # Define the llm for the manager agent
-    output_log_file=log_filename # Specify the log file
+# Task 7: Lead Artist - Generate NFT Viewing Interface Concepts
+task_artist_nft_view_concepts = Task(
+  description=(
+    "Generate detailed textual descriptions suitable for creating concept art or visual mockups for the 'NFT Viewing Interface' of Mythborne Companions. "
+    "Use the Knowledge Base Search tool to find and review the latest 'Refined NFT Viewing Interface' specification document (likely named 'ui_nft_viewing_spec_v1_...' ). "
+    "Based on that document, provide descriptions for: "
+    "1. The overall 'Collection Screen' appearance, focusing on the grid layout and how different rarity cards (e.g., Common vs. Legendary) should visually differ according to the spec (borders, backgrounds, effects). "
+    "2. A close-up view of a 'Legendary' NFT card, detailing its specified visual elements (golden border, glow, crown icon, name/rarity text placement). "
+    "3. The layout of the 'NFT Detail Screen', describing the arrangement of the large image, name/rarity info, description, and the tabs ('Details', 'Ownership History', 'Marketplace Activity'). "
+    "Ensure descriptions align with the established 'Stylized 2D Fantasy Cartoon' art direction (reference the art style guide in the KB if needed)."
+  ),
+  expected_output=(
+    "Detailed textual descriptions suitable for use as prompts for an image generation AI or as briefs for a human artist. The output must include descriptions for: "
+    "1) The NFT Collection Screen grid layout, highlighting visual differences between rarity tiers. "
+    "2) A detailed visual breakdown of a Legendary NFT card. "
+    "3) The layout and key elements of the NFT Detail Screen."
+  ),
+  agent=lead_artist # Assign task to the Lead Artist
 )
 
-# --- Start the Crew's Work ---
-print("###################################################")
-# Update print statement to reflect new focus
-print("## Starting Mythborne Companions Crew Run (Refine NFT View UI, Implement Backend Code)...")
-print(f"## Logging verbose output to: {crew.output_log_file}") # Access the filename from the crew object
-print("###################################################")
-result = crew.kickoff()
+# --- Crew Definition --- Change the tasks list here for different runs
+# Update the tasks list to run only the new artist task
+mythborne_crew = Crew(
+    agents=[project_manager, game_designer, lead_programmer, lead_artist, ui_ux_designer],
+    tasks=[
+        task_artist_nft_view_concepts # Run only this task for now
+    ],
+    process=Process.sequential,
+    verbose=True,
+    output_log_file=log_filename # Using timestamped variable
+)
+
+# --- Kick Off the Crew's Work ---
+print(f"###################################################")
+print(f"## Starting Mythborne Companions Crew Run (Artist NFT View Concepts)...") # Updated print
+print(f"## Logging verbose output to: {mythborne_crew.output_log_file}")
+print(f"###################################################")
+result = mythborne_crew.kickoff()
 
 # --- Print the Final Result ---
 print("\n\n###################################################")
 print("## Crew Run Completed!")
-print(f"## Full verbose log saved to: {crew.output_log_file}")
+print(f"## Full verbose log saved to: {mythborne_crew.output_log_file}")
 print("###################################################")
-# Output will be from the last task (Lead Programmer - Implement Backend Code)
-print("\nFinal Output (from Lead Programmer - Implement Backend Code Task):\n")
+print("\nFinal Output (from Lead Artist - NFT View Concepts Task):\n") # Updated print
 print(result)

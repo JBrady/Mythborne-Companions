@@ -1,8 +1,41 @@
+"""
+Script to create or update a ChromaDB vector store index for RAG.
+
+This script performs the following steps:
+1.  Loads documents from a specified directory (`knowledge_base`).
+2.  Splits the loaded documents into smaller text chunks.
+3.  Initializes a local sentence transformer model (`all-MiniLM-L6-v2` via HuggingFace)
+    to generate text embeddings. Downloads the model on first run.
+4.  Generates embeddings for all text chunks.
+5.  Creates or updates a persistent ChromaDB vector store using these embeddings,
+    saving the index to a specified directory (`chroma_db`).
+
+Dependencies:
+- langchain_chroma
+- langchain_huggingface
+- langchain
+- unstructured (and potentially specific format extras like [md], [docx])
+- sentence-transformers
+- chromadb
+
+Configuration:
+- KNOWLEDGE_BASE_DIR: Folder containing source documents.
+- CHROMA_PERSIST_DIR: Folder where the ChromaDB index will be saved.
+- EMBEDDING_MODEL_NAME: The Hugging Face sentence transformer model to use.
+
+Usage:
+- Place source documents (e.g., .txt files) into the KNOWLEDGE_BASE_DIR.
+- Run this script from the command line using `python create_index.py`.
+- Run initially to create the index, and subsequently whenever documents
+  in the KNOWLEDGE_BASE_DIR are added, removed, or significantly modified.
+"""
+
 import os
 from langchain_community.document_loaders import DirectoryLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import HuggingFaceEmbeddings # For local embeddings
+from langchain.text_splitter import RecursiveCharacterTextSplitter # Still often in langchain base
+from langchain_chroma import Chroma # Updated Chroma import
+from langchain_huggingface import HuggingFaceEmbeddings # Updated Embeddings import
+
 import time # Optional: to time the process
 
 # --- Configuration ---
@@ -75,9 +108,6 @@ vectorstore = Chroma.from_documents(
 embed_end_time = time.time()
 print(f"Embedding completed in {embed_end_time - embed_init_end_time:.2f} seconds.")
 
-print("Ensuring persistence...")
-vectorstore.persist()
-persist_end_time = time.time()
-print(f"ChromaDB index persisted in {persist_end_time - embed_end_time:.2f} seconds.")
-total_time = persist_end_time - start_time
+print("ChromaDB index automatically persisted during creation/update.")
+total_time = embed_end_time - start_time # Adjusted total time calculation
 print(f"Total indexing time: {total_time:.2f} seconds.")
