@@ -1,3 +1,48 @@
+"""
+Main script for orchestrating CrewAI agents for the Mythborne Companions project.
+
+This script defines the agents (Project Manager, Game Designer, etc.),
+their roles, goals, and tools (including a RAG tool for knowledge base access).
+It also defines various tasks that can be assigned to these agents.
+
+Key functionalities:
+- Loads environment variables (e.g., API keys) from a .env file.
+- Configures the language model (LLM) to be used by the agents (currently OpenAI GPT-4.5-preview).
+- Sets up a Retrieval-Augmented Generation (RAG) tool:
+    - Initializes a local HuggingFace embedding model (all-MiniLM-L6-v2).
+    - Loads a persistent ChromaDB vector store from the 'chroma_db' directory
+      (which should be created/updated by running create_index.py).
+    - Defines a 'Knowledge Base Search' tool allowing agents to query the vector store.
+- Defines Agent objects with specific roles, goals, backstories, and assigned tools.
+- Defines Task objects with descriptions, expected outputs, and assigned agents.
+- Creates a Crew object, assigning agents and a specific list of tasks to be executed.
+- Configures the Crew to log verbose output to a timestamped file in the 'logs' directory.
+- Kicks off the Crew execution using a sequential process.
+- Prints the final result from the last task executed.
+
+Dependencies:
+- crewai, crewai_tools
+- langchain_openai
+- python-dotenv
+- langchain_chroma (or langchain_community.vectorstores)
+- langchain_huggingface (or langchain_community.embeddings)
+- chromadb
+- sentence-transformers
+
+Configuration:
+- Requires a .env file in the root directory with OPENAI_API_KEY defined.
+- Expects a 'knowledge_base' folder with source documents.
+- Expects a 'chroma_db' folder created by running create_index.py.
+- Creates a 'logs' folder for output log files.
+
+Usage:
+- Ensure the knowledge base is indexed by running `python create_index.py`.
+- Modify the `tasks=[...]` list within the `Crew` definition near the end of the
+  script to select which tasks should be executed for a given run.
+- Run the script from the command line using `python main.py`.
+- Check the timestamped log file in the 'logs' directory for detailed output.
+"""
+
 import os
 from datetime import datetime
 from crewai import Agent, Task, Crew, Process # Keep these from crewai
