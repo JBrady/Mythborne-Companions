@@ -231,10 +231,38 @@ task_ui_design_marketplace = Task(
     context=[task_detail_nft_mechanics] # Run after GD details NFT mechanics
 )
 
+# Task 5: UI/UX Designer - Refine NFT Viewing UI
+task_ui_refine_nft_viewing = Task(
+    description=(
+        "Based on the detailed NFT specification provided by the Game Designer (use KB Search for 'Detailed NFT Implementation Specification') and the Project Manager's feedback from the last review (requesting specific UI elements for rarity visualization, transaction transparency, and scalability), refine the UI design for viewing NFTs within the player's inventory or collection screen. "
+        "Create detailed wireframes or update existing mockups to show exactly how rarity, ownership history (if applicable), and other key NFT details are presented to the user."
+    ),
+    expected_output=(
+        "Updated wireframes/design document detailing the NFT viewing interface elements, specifically addressing rarity display, transparency indicators, and scalability considerations."
+    ),
+    agent=ui_ux_designer,
+    context=[task_detail_nft_mechanics] # Depends on the detailed NFT spec from the previous run
+)
+
+# Task 6: Lead Programmer - Implement Game-Side Event Backend Logic
+task_lp_implement_event_backend_code = Task(
+    description=(
+        "Based on the backend logic structure you previously outlined (use KB Search for 'backend logic implementation for the first NFT event') and the detailed NFT specification from the Game Designer (use KB Search for 'Detailed NFT Implementation Specification'), implement the core game-side logic for the first NFT event. "
+        "Code the `EventQuestTracker`, `EventMilestoneEvaluator`, `NFTRewardCalculator`, and `NFTHandlerInterface` modules in the project's backend language/framework (e.g., JavaScript/Node.js if applicable, or Python). "
+        "Focus on functionality for tracking progress, evaluating milestones, calculating rewards based on probability and mint limits, and correctly interfacing with the placeholder NFT handler. Unit tests for key logic components are encouraged."
+    ),
+    expected_output=(
+        "A summary confirming the implementation of the backend modules (`EventQuestTracker`, `EventMilestoneEvaluator`, `NFTRewardCalculator`, `NFTHandlerInterface`). Confirmation that the code adheres to the previous plan and specification. State that the code has been added to the appropriate project directory (e.g., `/backend/modules/nft_event.js` or similar). No raw code output is expected."
+    ),
+    agent=lead_programmer,
+    # Context needs both the detailed spec and the programmer's previous plan
+    context=[task_detail_nft_mechanics, task_lp_implement_event_backend]
+)
+
 # --- Crew Definition --- Change the tasks list here for different runs
 crew = Crew(
     agents=[project_manager, game_designer, lead_programmer, lead_artist, ui_ux_designer],
-    tasks=[task_pm_review_sprint1, task_detail_nft_mechanics, task_lp_implement_event_backend, task_ui_design_marketplace], # <<< Run Review, Detail NFT, Implement Backend, Design Marketplace
+    tasks=[task_ui_refine_nft_viewing, task_lp_implement_event_backend_code], # <<< Run Refine NFT View UI, Implement Backend Code
     process=Process.sequential, # Tasks will be executed sequentially
     verbose=True, # Verbose output level (True/False in newer versions)
     # memory=True, # Enable memory for the crew (experimental)
@@ -248,7 +276,7 @@ crew = Crew(
 # --- Start the Crew's Work ---
 print("###################################################")
 # Update print statement to reflect new focus
-print("## Starting Mythborne Companions Crew Run (Review, Detail NFT, Implement Backend, Design Marketplace)...")
+print("## Starting Mythborne Companions Crew Run (Refine NFT View UI, Implement Backend Code)...")
 print(f"## Logging verbose output to: {crew.output_log_file}") # Access the filename from the crew object
 print("###################################################")
 result = crew.kickoff()
@@ -258,6 +286,6 @@ print("\n\n###################################################")
 print("## Crew Run Completed!")
 print(f"## Full verbose log saved to: {crew.output_log_file}")
 print("###################################################")
-# Output will be from the last task (UI/UX Designer - Marketplace Flow Design)
-print("\nFinal Output (from UI/UX Designer - Marketplace Transaction Flow Design Task):\n")
+# Output will be from the last task (Lead Programmer - Implement Backend Code)
+print("\nFinal Output (from Lead Programmer - Implement Backend Code Task):\n")
 print(result)
