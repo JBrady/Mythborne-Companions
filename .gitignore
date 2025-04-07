@@ -19,11 +19,11 @@ logs/
 chroma_db/
 
 # Source documents for RAG (often project-specific or potentially sensitive)
-knowledge_base/
+data/
 
 # IDE specific folders
 .vscode/
 .idea/
 
 # Archive for old knowledge base files
-archived_knowledge_base/
+# archived_knowledge_base/

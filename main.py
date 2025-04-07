@@ -31,7 +31,7 @@ Dependencies:
 
 Configuration:
 - Requires a .env file in the root directory with OPENAI_API_KEY defined.
-- Expects a 'knowledge_base' folder with source documents.
+- Expects a 'data/knowledge_base' folder with source documents.
 - Expects a 'chroma_db' folder created by running create_index.py.
 - Creates a 'logs' folder for output log files.
 
@@ -348,8 +348,26 @@ task_artist_nft_view_concepts = Task(
     agent=lead_artist,  # Assign task to the Lead Artist
 )
 
-# --- Crew Definition --- Change the tasks list here for different runs
-# Update the tasks list to run only the new artist task
+# Task 8: Project Manager - Review Latest Outputs
+task_pm_review_latest_outputs = Task(
+    description=(
+        "Review the latest outputs added to the knowledge base. Use the Knowledge Base Search tool to find and examine: "
+        "1) The Artist's concepts for the NFT Viewing Interface (likely 'artist_concepts_nft_view_v1_...txt'). "
+        "2) The Programmer's summary of the NFT Event Backend Logic implementation ('backend_nft_event_code_summary_v1_...txt'). "
+        "Assess if these outputs sufficiently address the previously identified gaps (e.g., UI rarity visualization, backend structure). "
+        "Verify their alignment with each other and the overall project specifications (like the Pi spec and NFT concepts, also searchable in the KB). "
+        "Confirm if the project is ready for frontend UI implementation of the NFT viewer, or identify any final blockers or clarifications needed first. "
+        "Conclude by stating the next highest priority task for the team."
+    ),
+    expected_output=(
+        "A concise review summary. State whether the latest Artist concepts and Programmer backend summary are aligned and sufficient for proceeding. "
+        "List any remaining critical blockers or questions, if any. Clearly state the recommended next priority task for the development team (e.g., 'Implement Frontend NFT Viewer UI', 'Clarify X with Designer', etc.)."
+    ),
+    agent=project_manager,  # Assign task to the Project Manager
+)
+
+# --- Create the Crew ---
+# *** IMPORTANT: Modify this list to include ONLY the task(s) for the *next* run ***
 mythborne_crew = Crew(
     agents=[
         project_manager,
@@ -358,16 +376,16 @@ mythborne_crew = Crew(
         lead_artist,
         ui_ux_designer,
     ],
-    tasks=[task_artist_nft_view_concepts],  # Run only this task for now
+    tasks=[task_pm_review_latest_outputs],  # Run only the PM review task
     process=Process.sequential,
     verbose=True,
-    output_log_file=log_filename,  # Using timestamped variable
+    output_log_file=log_filename,  # Use the timestamped variable
 )
 
 # --- Kick Off the Crew's Work ---
 print(f"###################################################")
 print(
-    f"## Starting Mythborne Companions Crew Run (Artist NFT View Concepts)..."
+    f"## Starting Mythborne Companions Crew Run (PM Review Latest Outputs)..."
 )  # Updated print
 print(f"## Logging verbose output to: {mythborne_crew.output_log_file}")
 print(f"###################################################")
@@ -378,5 +396,5 @@ print("\n\n###################################################")
 print("## Crew Run Completed!")
 print(f"## Full verbose log saved to: {mythborne_crew.output_log_file}")
 print("###################################################")
-print("\nFinal Output (from Lead Artist - NFT View Concepts Task):\n")  # Updated print
+print("\nFinal Output (from Project Manager - Review Task):\n")  # Updated print
 print(result)

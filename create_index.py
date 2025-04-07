@@ -41,7 +41,7 @@ from langchain_huggingface import HuggingFaceEmbeddings  # Updated Embeddings im
 import time  # Optional: to time the process
 
 # --- Configuration ---
-KNOWLEDGE_BASE_DIR = "knowledge_base"  # Folder containing your documents
+KNOWLEDGE_BASE_DIR = "data/knowledge_base"  # Folder containing your documents
 CHROMA_PERSIST_DIR = "chroma_db"  # Folder where the DB will be saved
 EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"  # Efficient local model
 
