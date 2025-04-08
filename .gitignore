@@ -24,3 +24,6 @@ data/
 # IDE specific folders
 .vscode/
 .idea/
+
+# VS Code specific
+*.code-workspace
