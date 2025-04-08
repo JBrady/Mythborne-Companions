@@ -24,6 +24,3 @@ data/
 # IDE specific folders
 .vscode/
 .idea/
-
-# Archive for old knowledge base files
-# archived_knowledge_base/
